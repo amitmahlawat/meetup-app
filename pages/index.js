@@ -1,5 +1,5 @@
-
 import MeetupList from "@/Components/meetups/MeetupList";
+
 
 const DUMMY_MEETUPS=[
     {id: 'm1', 
@@ -20,20 +20,38 @@ const DUMMY_MEETUPS=[
         address : 'some address 10, 1234 some city',
         description: 'this is third meetup'
         }
-         
+        ]
 
-]
-
-function HomePage() {
-
+function HomePage(props) {
 
 
 return (
     
-    <MeetupList  meetups={DUMMY_MEETUPS}/>
+    <MeetupList  meetups={props.meetups}/>
     
     
   )
 }
+
+export async function getServerSideProps(){
+
+
+    return{
+        props:{
+                meetups:DUMMY_MEETUPS
+            }
+    }
+}
+
+// export async function getStaticProps() {
+
+//     return{
+//         props:{
+//             meetups:DUMMY_MEETUPS
+//         },
+//         revalidate: 10
+//     }
+    
+// }
 
 export default HomePage;

@@ -1,52 +1,53 @@
 import MeetupDetail from "../../Components/meetups/MeetupDetail";
-
-function MeetupDetails() {
+import { MongoClient, ObjectId ,} from "mongodb";
+function MeetupDetails(props) {
   return (
     <MeetupDetail
-      image={
-        "https://cf.bstatic.com/xdata/images/hotel/max1280x900/515205059.jpg?k=3b29cbb7484dd64d4b968e1ca23f9e036269f2eebfa6cf4006ca7ce18c1c9f19&o=&hp=1"
-      }
-      id={"Amit"}
-      title={"this is first meetup"}
-      address={"some address , some city 5"}
-      description={" this is first meetup"}
+      image={props.meetupData.image}
+      id={props.meetupData.id}
+      title={props.meetupData.title}
+      address={props.meetupData.address}
+      description={props.meetupData.description}
     ></MeetupDetail>
   );
 }
-export function getStaticPaths(){
+export async function getStaticPaths(){
+
+  const Client=await MongoClient.connect('mongodb+srv://Amit:ccw79FeCPa4jLIHd@cluster0.rleji.mongodb.net/meetups?retryWrites=true&w=majority&appName=Cluster0')
+  const db=Client.db()
+
+  const meetupsCollection = db.collection("meetups");
+
+  const meetups= await meetupsCollection.find({},{ _id : 1}).toArray();;
+  Client.close();
+
   return{
     fallback:false,
-    paths:[
-      {
-        params:{
-          meetupID:"m1"
-        }
-      },
-      {
-        params:{
-          meetupID:"m2"
-        }
-      },
-      {
-        params:{
-          meetupID:"m3"
-        }
-      }
-    ]
+    paths:meetups.map(meetup=>({params:{meetupID:meetup._id.toString()}}))
   }
 }
 
  export async function getStaticProps(context){
   const meetupId=context.params.meetupID;
   console.log(meetupId)
+  const Client=await MongoClient.connect('mongodb+srv://Amit:ccw79FeCPa4jLIHd@cluster0.rleji.mongodb.net/meetups?retryWrites=true&w=majority&appName=Cluster0')
+  const db=Client.db()
+
+  const meetupsCollection = db.collection("meetups");
+
+  const Selectedmeetup=await meetupsCollection.findOne({_id :new ObjectId(meetupId)})
+  Client.close();
+
 
   return {
     props:{
-      meetupData:{
-        image:"https://cf.bstatic.com/xdata/images/hotel/max1280x900/515205059.jpg?k=3b29cbb7484dd64d4b968e1ca23f9e036269f2eebfa6cf4006ca7ce18c1c9f19&o=&hp=1",
-        id:meetupId,
-        address:"some address , some city 5",
-        description:" this is first meetup"
+      meetupData:
+      {
+        id: Selectedmeetup._id.toString(),
+        title: Selectedmeetup.title,
+        image: Selectedmeetup.image,
+        address: Selectedmeetup.address,
+        description: Selectedmeetup.description
       }
     }
   }
